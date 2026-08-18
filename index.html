@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050b10">
+<meta name="description" content="Builder-Morphe; YouTube, Instagram, Reddit, TikTok ve daha fazlasının Morphe/ReVanced tarzı yamalı sürümlerini GitHub Actions ile otomatik yamar, imzalar ve yayınlar.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Builder-Morphe">
+<meta property="og:description" content="GitHub Actions üzerinde otomatik çalışan APK yama hattı — indirir, yamalar, imzalar, yayınlar.">
+<meta property="og:url" content="https://github.com/Erlikx/Builder-Morphe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Builder-Morphe">
+<meta name="twitter:description" content="GitHub Actions üzerinde otomatik çalışan APK yama hattı.">
+<title>Builder-Morphe — Yamalı APK Kataloğu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect x='2' y='2' width='36' height='36' rx='11' fill='%2314d8c4'/><polygon points='20,7 32,20 20,33 8,20' fill='white' fill-opacity='0.4'/><polygon points='20,7 32,20 20,20' fill='white' fill-opacity='0.6'/></svg>">
+<style>
+/* ============ Tokens ============ */
+:root{
+  --void:#050b10;
+  --surface:#0a1720;
+  --surface-2:#0e202b;
+  --blue:#2e82ff;
+  --teal:#14d8c4;
+  --green:#3ddc84;
+  --foam:#eafffa;
+  --mist:#a9c9c7;
+  --mist-dim:#72908e;
+  --line:#ffffff;
+  --glass-opacity:0.72;
+  --glass-blur:26px;
+  --radius-lg:28px;
+  --radius-md:18px;
+  --radius-sm:12px;
+  --ease:cubic-bezier(.16,.84,.44,1);
+  --font-display:'Syne',system-ui,sans-serif;
+  --font-body:'Manrope',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  --container:1180px;
+}
+
+/* ============ Reset ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  background:var(--void);
+  color:var(--foam);
+  font-family:var(--font-body);
+  line-height:1.5;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button,input{font-family:inherit;color:inherit}
+ul{list-style:none}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:4px}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important}
+}
+
+/* ============ Layout helpers ============ */
+.container{width:100%;max-width:var(--container);margin:0 auto;padding:0 24px}
+.eyebrow{
+  font-family:var(--font-display);
+  font-size:.78rem;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--teal);
+  text-shadow:0 1px 6px rgba(0,0,0,.6);
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.eyebrow::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+
+/* ============ Background atmosphere ============ */
+.atmosphere{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;will-change:transform}
+.blob-blue{width:46vw;height:46vw;left:-12vw;top:-14vw;background:radial-gradient(circle,var(--blue),transparent 70%)}
+.blob-teal{width:38vw;height:38vw;right:-8vw;top:8vw;background:radial-gradient(circle,var(--teal),transparent 70%)}
+.blob-green{width:34vw;height:34vw;left:18vw;bottom:-16vw;background:radial-gradient(circle,var(--green),transparent 70%)}
+.grain{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.035) 1px,transparent 1px);background-size:3px 3px;mix-blend-mode:overlay;opacity:.4}
+
+@media (prefers-reduced-motion: no-preference){
+  .blob-blue{animation:driftA 34s ease-in-out infinite alternate}
+  .blob-teal{animation:driftB 40s ease-in-out infinite alternate}
+  .blob-green{animation:driftC 46s ease-in-out infinite alternate}
+}
+@keyframes driftA{to{transform:translate(6vw,8vw) scale(1.12)}}
+@keyframes driftB{to{transform:translate(-8vw,6vw) scale(1.08)}}
+@keyframes driftC{to{transform:translate(5vw,-6vw) scale(1.15)}}
+
+/* ============ Glass system ============ */
+.glass{
+  position:relative;
+  background:
+    linear-gradient(155deg, rgba(46,130,255,calc(.22 * var(--glass-opacity))), rgba(20,216,196,calc(.16 * var(--glass-opacity))) 45%, rgba(61,220,132,calc(.12 * var(--glass-opacity))) 100%),
+    rgba(255,255,255,calc(.06 * var(--glass-opacity)));
+  backdrop-filter:blur(var(--glass-blur)) saturate(210%) brightness(1.08) contrast(1.04);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(210%) brightness(1.08) contrast(1.04);
+  border:1px solid rgba(255,255,255,calc(.18 * var(--glass-opacity)));
+  border-radius:var(--radius-md);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,calc(.5 * var(--glass-opacity))),
+    inset 0 -1px 0 rgba(0,0,0,.35),
+    inset 1.5px 1.5px 0 -.5px rgba(255,100,110,.32),
+    inset -1.5px -1.5px 0 -.5px rgba(90,175,255,.32),
+    0 24px 60px -28px rgba(0,0,0,.65);
+}
+/* Content sits above the decorative ring/sheen layers below */
+.hero-glass > *, .nav-inner > *, .toolbar-panel > *, .card > *,
+.how-card > *, .footer-panel > *, .gh-link > *, .state-card > *{
+  position:relative;z-index:5;
+}
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;}
+.glass::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;
+  background:linear-gradient(115deg,transparent 28%,rgba(255,255,255,.3) 46%,rgba(255,255,255,.06) 52%,transparent 68%);
+  background-size:240% 240%;background-position:130% -30%;
+  opacity:.5;
+}
+@media (prefers-reduced-motion: no-preference){
+  .glass::after{animation:sheen 7s ease-in-out infinite}
+  .grid .card:nth-child(3n+2)::after{animation-delay:-2.3s}
+  .grid .card:nth-child(3n)::after{animation-delay:-4.6s}
+}
+.glass:hover::after{opacity:1;animation:sheen 1.1s var(--ease)}
+@keyframes sheen{0%,100%{background-position:130% -30%}50%{background-position:-30% 130%}}
+
+/* Lens ring: a masked, stronger-blur band right at the edge — where a real glass bevel bends light most */
+.glass-lens::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
+  backdrop-filter:blur(calc(var(--glass-blur) * .4)) saturate(260%) brightness(1.3);
+  -webkit-backdrop-filter:blur(calc(var(--glass-blur) * .4)) saturate(260%) brightness(1.3);
+  -webkit-mask:radial-gradient(ellipse at 50% 50%, transparent 56%, black 94%);
+  mask:radial-gradient(ellipse at 50% 50%, transparent 56%, black 94%);
+}
+
+.glass-chrome{
+  background:rgba(9,20,26,calc(.55 * var(--glass-opacity) + .3));
+  backdrop-filter:blur(calc(var(--glass-blur) * .7)) saturate(160%);
+  -webkit-backdrop-filter:blur(calc(var(--glass-blur) * .7)) saturate(160%);
+  border:1px solid rgba(255,255,255,calc(.12 * var(--glass-opacity)));
+}
+
+/* Hero: heaviest glass tier — lens ring + cursor/tilt-reactive highlight + SVG refraction where supported */
+.hero-glass{
+  background:
+    radial-gradient(circle at var(--mx,50%) var(--my,28%), rgba(255,255,255,.34), transparent 42%),
+    linear-gradient(155deg, rgba(46,130,255,calc(.22 * var(--glass-opacity))), rgba(20,216,196,calc(.16 * var(--glass-opacity))) 45%, rgba(61,220,132,calc(.12 * var(--glass-opacity))) 100%),
+    rgba(255,255,255,calc(.06 * var(--glass-opacity)));
+  backdrop-filter:blur(22px) saturate(210%) brightness(1.08) contrast(1.04);
+  -webkit-backdrop-filter:blur(22px) saturate(210%) brightness(1.08) contrast(1.04);
+  transform:perspective(1200px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transition:transform .3s var(--ease), box-shadow .35s var(--ease);
+}
+@supports (backdrop-filter: url(#a)) or (-webkit-backdrop-filter: url(#a)){
+  .hero-glass{backdrop-filter:url(#liquidRefraction) blur(9px) saturate(220%) brightness(1.08) contrast(1.04);-webkit-backdrop-filter:blur(22px) saturate(220%) brightness(1.08)}
+}
+
+/* ============ Nav ============ */
+.nav{position:sticky;top:0;z-index:40;padding:14px 0}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:10px 18px;border-radius:999px;
+}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:1.05rem;letter-spacing:.01em}
+.brand-mark{flex:none}
+.nav-right{display:flex;align-items:center;gap:18px}
+.glass-slider-wrap{display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--mist);white-space:nowrap}
+.glass-slider-wrap span{font-family:var(--font-mono)}
+input[type="range"]{
+  -webkit-appearance:none;appearance:none;width:78px;height:4px;border-radius:4px;
+  background:linear-gradient(90deg,var(--blue),var(--teal),var(--green));cursor:pointer;
+}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--foam);border:2px solid var(--teal);cursor:pointer;
+  box-shadow:0 0 8px rgba(20,216,196,.7);
+}
+input[type="range"]::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;background:var(--foam);border:2px solid var(--teal);cursor:pointer;
+}
+.gh-link{display:flex;align-items:center;gap:7px;font-size:.85rem;font-weight:600;padding:8px 14px;border-radius:999px}
+.gh-link svg{width:17px;height:17px}
+
+/* ============ Buttons ============ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:var(--font-body);font-weight:700;font-size:.92rem;
+  padding:13px 22px;border-radius:999px;border:1px solid transparent;cursor:pointer;
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease);
+}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:linear-gradient(120deg,var(--blue),var(--teal));color:#04121a;box-shadow:0 12px 30px -10px rgba(20,216,196,.55)}
+.btn-primary:hover{box-shadow:0 16px 36px -8px rgba(20,216,196,.7)}
+.btn-ghost{border-color:rgba(255,255,255,.22);color:var(--foam)}
+.btn-ghost:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.04)}
+.btn-sm{padding:9px 16px;font-size:.82rem}
+
+/* ============ Hero ============ */
+.hero{position:relative;z-index:1;padding:64px 0 40px}
+.hero-glass{
+  border-radius:var(--radius-lg);
+  padding:clamp(32px,6vw,64px) clamp(24px,6vw,64px);
+  overflow:hidden;
+}
+.hero-content{
+  position:relative;z-index:5;max-width:760px;
+  padding:26px 30px;margin:-26px -30px;border-radius:26px;
+  background:radial-gradient(ellipse at 28% 15%, rgba(3,9,13,.5), rgba(3,9,13,.26) 55%, rgba(3,9,13,.06) 100%);
+}
+.hero h1{
+  font-family:var(--font-display);font-weight:800;
+  font-size:clamp(2.3rem,5.4vw,4.2rem);line-height:1.04;letter-spacing:-.01em;
+  margin:18px 0 20px;
+  background:linear-gradient(120deg,var(--foam) 40%,var(--teal) 75%,var(--green));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p.sub{font-size:clamp(1rem,1.6vw,1.18rem);color:var(--mist);max-width:56ch;margin-bottom:32px}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:36px}
+.stat-row{display:flex;flex-wrap:wrap;gap:12px}
+.stat-pill{
+  display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;
+  font-size:.82rem;font-weight:600;color:var(--mist);
+  background:rgba(4,10,14,.4);border:1px solid rgba(255,255,255,.12);
+}
+.stat-pill b{font-family:var(--font-mono);color:var(--foam);font-weight:600}
+
+/* Reveal-on-scroll */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal.in{opacity:1;transform:translateY(0)}
+.hero-content > *{opacity:0;transform:translateY(16px);animation:riseIn .8s var(--ease) forwards}
+.hero-content > *:nth-child(1){animation-delay:.05s}
+.hero-content > *:nth-child(2){animation-delay:.16s}
+.hero-content > *:nth-child(3){animation-delay:.27s}
+.hero-content > *:nth-child(4){animation-delay:.38s}
+.hero-content > *:nth-child(5){animation-delay:.49s}
+@keyframes riseIn{to{opacity:1;transform:translateY(0)}}
+
+/* ============ Toolbar ============ */
+.toolbar{position:relative;z-index:1;padding:28px 0 8px}
+.toolbar-panel{border-radius:var(--radius-md);padding:18px 20px}
+.search-row{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);margin-bottom:16px}
+.search-row svg{flex:none;opacity:.6}
+.search-row input{flex:1;background:none;border:none;outline:none;font-size:.95rem;color:var(--foam)}
+.search-row input::placeholder{color:var(--mist-dim)}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-size:.8rem;font-weight:600;padding:7px 14px;border-radius:999px;cursor:pointer;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--mist);
+  transition:all .2s var(--ease);
+}
+.chip:hover{border-color:rgba(255,255,255,.3);color:var(--foam)}
+.chip.active{background:linear-gradient(120deg,var(--blue),var(--teal));color:#04121a;border-color:transparent}
+.status-line{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:.82rem;color:var(--mist-dim)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex:none}
+
+/* ============ Builds grid ============ */
+.builds{position:relative;z-index:1;padding:20px 0 90px}
+.section-head{margin-bottom:26px}
+.section-head h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.5rem,3vw,2.1rem);margin-top:10px}
+.section-head p{color:var(--mist);margin-top:8px;max-width:60ch}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+
+.card{
+  border-radius:var(--radius-md);padding:20px;display:flex;flex-direction:column;gap:14px;
+  transition:transform .3s var(--ease);
+}
+.card:hover{transform:translateY(-4px)}
+.card-top{display:flex;align-items:center;gap:12px}
+.card-icon{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.08);padding:8px;flex:none}
+.card-icon img{width:100%;height:100%;object-fit:contain}
+.card-name{font-weight:700;font-size:.98rem;line-height:1.2}
+.card-source{font-size:.72rem;color:var(--teal);font-weight:600;margin-top:3px}
+.card-meta{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:.78rem;color:var(--mist)}
+.card-dl{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px;border-radius:12px;font-weight:700;font-size:.85rem;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
+  transition:all .25s var(--ease);
+}
+.card-dl:hover{background:linear-gradient(120deg,var(--blue),var(--teal));color:#04121a;border-color:transparent}
+.card-dl svg{width:15px;height:15px}
+
+/* Skeleton */
+.skel{overflow:hidden}
+.skel-bar{height:12px;border-radius:6px;background:rgba(255,255,255,.08);position:relative;overflow:hidden}
+.skel-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);animation:shimmer 1.6s infinite}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.skel .card-icon{background:rgba(255,255,255,.08)}
+
+/* Empty / error state */
+.state-card{grid-column:1/-1;border-radius:var(--radius-lg);padding:56px 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.state-card svg{opacity:.7;margin-bottom:6px}
+.state-card h3{font-family:var(--font-display);font-size:1.2rem;font-weight:700}
+.state-card p{color:var(--mist);max-width:44ch}
+
+/* ============ How it works ============ */
+.how{position:relative;z-index:1;padding:20px 0 100px}
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:30px}
+.how-card{border-radius:var(--radius-md);padding:26px 22px}
+.how-num{font-family:var(--font-mono);font-size:.8rem;color:var(--teal);font-weight:600;margin-bottom:14px;display:block}
+.how-card h3{font-family:var(--font-display);font-size:1.05rem;font-weight:700;margin-bottom:10px}
+.how-card p{color:var(--mist);font-size:.9rem;line-height:1.55}
+
+/* ============ Footer ============ */
+.footer{position:relative;z-index:1;padding:28px 0 48px}
+.footer-panel{border-radius:var(--radius-lg);padding:26px 30px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:18px}
+.footer-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700}
+.footer-links{display:flex;gap:18px;font-size:.85rem;font-weight:600}
+.footer-links a:hover{color:var(--teal)}
+.disclaimer{font-size:.76rem;color:var(--mist-dim);max-width:640px;line-height:1.6}
+
+/* ============ Responsive ============ */
+@media (max-width:720px){
+  .container{padding:0 16px}
+  .nav-inner{padding:9px 14px}
+  .glass-slider-wrap span:not(.mid){display:none}
+  .hero{padding:36px 0 24px}
+  .hero-glass{padding:30px 20px}
+  .stat-row{gap:8px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .footer-panel{flex-direction:column;align-items:flex-start;text-align:left}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="liquidRefraction" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.008 0.014" numOctaves="2" seed="11" result="noise"/>
+      <feGaussianBlur in="noise" stdDeviation="2.4" result="softNoise"/>
+      <feDisplacementMap in="SourceGraphic" in2="softNoise" scale="46" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="atmosphere">
+  <div class="blob blob-blue"></div>
+  <div class="blob blob-teal"></div>
+  <div class="blob blob-green"></div>
+  <div class="grain"></div>
+</div>
+
+<nav class="nav">
+  <div class="container">
+    <div class="nav-inner glass glass-chrome">
+      <a href="#top" class="brand">
+        <svg class="brand-mark" width="30" height="30" viewBox="0 0 40 40" aria-hidden="true">
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#2e82ff"/>
+              <stop offset="55%" stop-color="#14d8c4"/>
+              <stop offset="100%" stop-color="#3ddc84"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="36" height="36" rx="11" fill="url(#logoGrad)"/>
+          <polygon points="20,7 32,20 20,33 8,20" fill="rgba(255,255,255,0.35)"/>
+          <polygon points="20,7 32,20 20,20" fill="rgba(255,255,255,0.55)"/>
+        </svg>
+        Builder-Morphe
+      </a>
+      <div class="nav-right">
+        <div class="glass-slider-wrap">
+          <span>Berrak</span>
+          <input type="range" id="glassRange" min="0" max="100" value="60" aria-label="Cam yoğunluğu">
+          <span>Yoğun</span>
+        </div>
+        <a class="gh-link glass glass-chrome" href="https://github.com/Erlikx/Builder-Morphe" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12a12 12 0 0 0 8.2 11.38c.6.11.82-.26.82-.58v-2.24c-3.34.73-4.04-1.42-4.04-1.42-.55-1.4-1.34-1.77-1.34-1.77-1.1-.75.08-.73.08-.73 1.21.09 1.85 1.25 1.85 1.25 1.08 1.84 2.83 1.31 3.52 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.16 0 0 1.01-.32 3.3 1.23A11.5 11.5 0 0 1 12 5.8c1.02 0 2.05.14 3.01.41 2.29-1.55 3.3-1.23 3.3-1.23.66 1.64.24 2.86.12 3.16.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57A12 12 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+  <section class="hero">
+    <div class="container">
+      <div class="hero-glass glass glass-lens">
+        <canvas id="heroCanvas" aria-hidden="true"></canvas>
+        <div class="hero-content">
+          <p class="eyebrow">GitHub Actions ile otomatik APK hattı</p>
+          <h1>İndirir. Yamalar.<br>İmzalar. Yayınlar.</h1>
+          <p class="sub">Builder-Morphe, YouTube'dan Waze'e kadar sevdiğin uygulamaları GitHub Actions üzerinde otomatik olarak yamalar, imza sertifikasını doğrular ve imzalı haliyle tek bir sürümde yayınlar.</p>
+          <div class="hero-ctas">
+            <a href="https://github.com/Erlikx/Builder-Morphe" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Repoyu Görüntüle</a>
+            <a href="#builds" class="btn btn-ghost">Son Build'lere Git ↓</a>
+          </div>
+          <div class="stat-row">
+            <div class="stat-pill"><b>17</b>&nbsp;uygulama</div>
+            <div class="stat-pill"><b>9</b>&nbsp;yama kaynağı</div>
+            <div class="stat-pill">Otomatik imza doğrulama</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="toolbar">
+    <div class="container">
+      <div class="toolbar-panel glass glass-lens reveal">
+        <div class="search-row">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Uygulama ara…" aria-label="Uygulama ara">
+        </div>
+        <div class="chip-row" id="chipRow">
+          <button class="chip active" data-key="all" type="button">Tümü</button>
+        </div>
+        <div class="status-line">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="statusText">Son build'ler getiriliyor…</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="builds" id="builds">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow">Katalog</p>
+        <h2>Build'ler</h2>
+        <p>Her build, indirildiği kaynağa göre doğrulanır ve kendi keystore'uyla imzalanır.</p>
+      </div>
+      <div class="grid" id="buildsGrid" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="how">
+    <div class="container">
+      <div class="section-head reveal">
+        <p class="eyebrow">Nasıl çalışır</p>
+        <h2>Dört adımlık bir hat</h2>
+      </div>
+      <div class="how-grid">
+        <div class="how-card glass glass-lens reveal">
+          <span class="how-num">01 · İndir</span>
+          <h3>Kaynağından indir</h3>
+          <p>APKMirror ya da GitHub üzerinden her uygulamanın en güncel sürümü indirilir.</p>
+        </div>
+        <div class="how-card glass glass-lens reveal">
+          <span class="how-num">02 · Yama</span>
+          <h3>Patch'i uygula</h3>
+          <p>Morphe, Piko, Adobo ve diğer kaynaklardan gelen patch'ler morphe-desktop ile uygulanır.</p>
+        </div>
+        <div class="how-card glass glass-lens reveal">
+          <span class="how-num">03 · Doğrula & İmzala</span>
+          <h3>Sertifikayı kontrol et</h3>
+          <p>İmza sertifikası bilinen parmak izleriyle karşılaştırılır, ardından kendi keystore'uyla imzalanır.</p>
+        </div>
+        <div class="how-card glass glass-lens reveal">
+          <span class="how-num">04 · Yayınla</span>
+          <h3>Tek sürümde topla</h3>
+          <p>Tüm APK'lar tek bir GitHub Release'de toplanır ve provenance attestation ile damgalanır.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-panel glass glass-lens reveal">
+      <div class="footer-brand">
+        <svg width="24" height="24" viewBox="0 0 40 40" aria-hidden="true">
+          <defs>
+            <linearGradient id="logoGradFooter" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#2e82ff"/>
+              <stop offset="55%" stop-color="#14d8c4"/>
+              <stop offset="100%" stop-color="#3ddc84"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="36" height="36" rx="11" fill="url(#logoGradFooter)"/>
+          <polygon points="20,7 32,20 20,33 8,20" fill="rgba(255,255,255,0.35)"/>
+        </svg>
+        Builder-Morphe
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/Erlikx/Builder-Morphe" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/Erlikx/Builder-Morphe/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+        <a href="https://github.com/Erlikx/Builder-Morphe/actions" target="_blank" rel="noopener noreferrer">Actions</a>
+      </div>
+      <p class="disclaimer">Uygulama adları, simgeleri ve ticari markaları ilgili hak sahiplerine aittir. Builder-Morphe bu şirketlerle bağlantılı ya da onlar tarafından onaylanmış değildir.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var REPO = "Erlikx/Builder-Morphe";
+  var API_URL = "https://api.github.com/repos/" + REPO + "/releases/latest";
+
+  var APPS = {
+    "youtube":        { display:"YouTube",       icon:"https://cdn.simpleicons.org/youtube/FF0000",       source:"Morphe" },
+    "youtube-music":  { display:"YT.Music",       icon:"https://cdn.simpleicons.org/youtubemusic/FF0000",  source:"Morphe" },
+    "reddit":         { display:"Reddit",         icon:"https://cdn.simpleicons.org/reddit/FF4500",        source:"Morphe" },
+    "reddit-adobo":   { display:"Reddit-Adobo",   icon:"https://cdn.simpleicons.org/reddit/FF4500",        source:"Adobo" },
+    "twitter":        { display:"Twitter",        icon:"https://cdn.simpleicons.org/x/000000",             source:"Piko" },
+    "instagram":      { display:"Instagram",      icon:"https://cdn.simpleicons.org/instagram/E4405F",     source:"Piko" },
+    "gboard":         { display:"Gboard",         icon:"https://cdn.simpleicons.org/google/4285F4",        source:"JasonWu" },
+    "speedtest":      { display:"Speedtest",      icon:"https://www.google.com/s2/favicons?sz=128&domain=speedtest.net", source:"Rushiranpise" },
+    "brave":          { display:"Brave",          icon:"https://cdn.simpleicons.org/brave/FB542B",         source:"Bufferk" },
+    "proton-vpn":     { display:"Proton VPN",     icon:"https://cdn.simpleicons.org/protonvpn",            source:"hoo-dles" },
+    "tiktok":         { display:"TikTok",         icon:"https://cdn.simpleicons.org/tiktok",               source:"TikTok Patches" },
+    "warp":           { display:"1.1.1.1",        icon:"https://cdn.simpleicons.org/1dot1dot1dot1",        source:"Rushiranpise" },
+    "inshot":         { display:"InShot",         icon:"https://www.google.com/s2/favicons?sz=128&domain=inshot.com", source:"Hooman's Patches" },
+    "google-photos":  { display:"Google Photos",  icon:"https://cdn.simpleicons.org/googlephotos",         source:"Rushiranpise" },
+    "inure-github":   { display:"inure-Github",   icon:"https://files.svgcdn.io/arcticons/inure.svg",      source:"Rushiranpise" },
+    "inure-play":     { display:"inure-PlayStore",icon:"https://files.svgcdn.io/arcticons/inure.svg",      source:"Rushiranpise" },
+    "waze":           { display:"Waze",           icon:"https://cdn.simpleicons.org/waze/33CCFF",          source:"Rushiranpise" }
+  };
+
+  var els = {
+    grid: document.getElementById("buildsGrid"),
+    status: document.getElementById("statusText"),
+    chipRow: document.getElementById("chipRow"),
+    search: document.getElementById("searchInput"),
+    glassRange: document.getElementById("glassRange")
+  };
+
+  var allBuilds = [];
+  var activeFilter = "all";
+
+  /* ---------- helpers ---------- */
+  function formatBytes(bytes){
+    if(!bytes) return "—";
+    var units=["B","KB","MB","GB"], i=0;
+    while(bytes>=1024 && i<units.length-1){bytes/=1024;i++}
+    return bytes.toFixed(bytes<10 && i>0?1:0)+" "+units[i];
+  }
+
+  function relativeTime(iso){
+    var diff = (Date.now() - new Date(iso).getTime())/1000;
+    var steps = [[60,"saniye"],[60,"dakika"],[24,"saat"],[30,"gün"],[12,"ay"]];
+    var val = diff, unit = "saniye";
+    for(var i=0;i<steps.length;i++){
+      if(val < steps[i][0]) break;
+      val = val/steps[i][0];
+      unit = steps[i][1];
+    }
+    val = Math.floor(val);
+    if(unit==="saniye" && val<5) return "az önce";
+    return val+" "+unit+" önce";
+  }
+
+  function matchAsset(fileName){
+    var lower = fileName.toLowerCase();
+    if(!lower.endsWith(".apk")) return null;
+    if(lower.startsWith("microg")) return null;
+    var base = fileName.slice(0,-4);
+    var entries = Object.keys(APPS).map(function(k){return [APPS[k].display,k]});
+    entries.sort(function(a,b){return b[0].length - a[0].length});
+    for(var i=0;i<entries.length;i++){
+      var display = entries[i][0], key = entries[i][1];
+      var prefix = display + "-";
+      if(base.toLowerCase().indexOf(prefix.toLowerCase())===0){
+        return { key:key, display:display, version:base.slice(prefix.length) };
+      }
+    }
+    return null;
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  /* ---------- rendering ---------- */
+  function renderSkeleton(){
+    var html = "";
+    for(var i=0;i<6;i++){
+      html += '<div class="card glass skel">'+
+        '<div class="card-top"><div class="card-icon"></div>'+
+        '<div style="flex:1"><div class="skel-bar" style="width:70%;margin-bottom:8px"></div><div class="skel-bar" style="width:40%"></div></div></div>'+
+        '<div class="skel-bar" style="width:100%;height:36px;border-radius:12px"></div></div>';
+    }
+    els.grid.innerHTML = html;
+  }
+
+  function renderChips(){
+    var html = '<button class="chip active" data-key="all" type="button">Tümü</button>';
+    var seen = {};
+    allBuilds.forEach(function(b){
+      if(seen[b.key]) return;
+      seen[b.key] = true;
+      html += '<button class="chip" data-key="'+b.key+'" type="button">'+escapeHtml(b.display)+'</button>';
+    });
+    els.chipRow.innerHTML = html;
+    els.chipRow.querySelectorAll(".chip").forEach(function(chip){
+      chip.addEventListener("click", function(){
+        els.chipRow.querySelectorAll(".chip").forEach(function(c){c.classList.remove("active")});
+        chip.classList.add("active");
+        activeFilter = chip.getAttribute("data-key");
+        renderGrid();
+      });
+    });
+  }
+
+  function cardHtml(b){
+    var app = APPS[b.key];
+    return '<div class="card glass reveal in">'+
+      '<div class="card-top">'+
+        '<div class="card-icon"><img src="'+app.icon+'" alt="" loading="lazy" onerror="this.style.opacity=0"></div>'+
+        '<div><div class="card-name">'+escapeHtml(b.display)+'</div><div class="card-source">'+escapeHtml(app.source)+'</div></div>'+
+      '</div>'+
+      '<div class="card-meta"><span title="'+escapeHtml(b.name)+'">v'+escapeHtml(b.version)+'</span><span>'+formatBytes(b.size)+'</span></div>'+
+      '<a class="card-dl" href="'+b.url+'" download target="_blank" rel="noopener noreferrer">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>'+
+        'İndir'+
+      '</a>'+
+    '</div>';
+  }
+
+  function stateHtml(kind){
+    var icon = kind==="empty"
+      ? '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'
+      : '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>';
+    var title = kind==="empty" ? "Henüz yayınlanmış bir build yok" : "Build listesi şu an yüklenemedi";
+    var text = kind==="empty"
+      ? "Actions sekmesinden Patch iş akışını çalıştırdığında ilk sürüm burada görünecek."
+      : "GitHub'daki sürümler sayfasını doğrudan açabilirsin.";
+    var href = kind==="empty" ? "https://github.com/"+REPO+"/actions" : "https://github.com/"+REPO+"/releases";
+    var cta = kind==="empty" ? "Actions'ı Aç" : "Releases'i Aç";
+    return '<div class="state-card glass glass-lens">'+icon+'<h3>'+title+'</h3><p>'+text+'</p>'+
+      '<a class="btn btn-primary btn-sm" href="'+href+'" target="_blank" rel="noopener noreferrer">'+cta+'</a></div>';
+  }
+
+  function renderGrid(){
+    var q = (els.search.value||"").trim().toLowerCase();
+    var filtered = allBuilds.filter(function(b){
+      var matchesChip = activeFilter==="all" || b.key===activeFilter;
+      var matchesSearch = !q || b.display.toLowerCase().indexOf(q)>-1 || APPS[b.key].source.toLowerCase().indexOf(q)>-1;
+      return matchesChip && matchesSearch;
+    });
+    if(filtered.length===0){
+      els.grid.innerHTML = allBuilds.length===0 ? stateHtml("empty") :
+        '<div class="state-card glass glass-lens"><h3>Eşleşen build yok</h3><p>Arama ya da filtreyi temizlemeyi dene.</p></div>';
+      return;
+    }
+    els.grid.innerHTML = filtered.map(cardHtml).join("");
+  }
+
+  /* ---------- fetch ---------- */
+  function loadReleases(){
+    renderSkeleton();
+    fetch(API_URL, { headers: { "Accept":"application/vnd.github+json" } })
+      .then(function(res){
+        if(res.status===404){ return null; }
+        if(!res.ok){ throw new Error("HTTP "+res.status); }
+        return res.json();
+      })
+      .then(function(data){
+        if(!data){
+          allBuilds = [];
+          els.status.textContent = "Henüz yayınlanmış bir build yok";
+          renderChips();
+          renderGrid();
+          return;
+        }
+        var assets = data.assets || [];
+        allBuilds = assets.map(function(a){
+          var m = matchAsset(a.name);
+          if(!m) return null;
+          return { key:m.key, display:m.display, version:m.version, name:a.name, size:a.size, url:a.browser_download_url };
+        }).filter(Boolean);
+
+        var when = data.published_at ? relativeTime(data.published_at) : "";
+        els.status.textContent = allBuilds.length
+          ? (data.name || data.tag_name)+" · "+when+" güncellendi"
+          : "Son sürümde eşleşen APK bulunamadı";
+
+        renderChips();
+        renderGrid();
+      })
+      .catch(function(err){
+        els.status.textContent = "Build listesi yüklenemedi";
+        els.grid.innerHTML = stateHtml("error");
+      });
+  }
+
+  /* ---------- interactions ---------- */
+  els.search.addEventListener("input", renderGrid);
+
+  function applyGlassIntensity(){
+    var t = Number(els.glassRange.value)/100;
+    var opacity = (0.4 + t*0.6).toFixed(2);
+    var blur = Math.round(14 + t*28);
+    document.documentElement.style.setProperty("--glass-opacity", opacity);
+    document.documentElement.style.setProperty("--glass-blur", blur+"px");
+  }
+  els.glassRange.addEventListener("input", applyGlassIntensity);
+  applyGlassIntensity();
+
+  var reduceMotion = !window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+  var canHover = window.matchMedia("(hover: hover)").matches;
+  var heroGlass = document.querySelector(".hero-glass");
+  var heroPointer = { x:0.72, y:0.7 };
+
+  if(heroGlass && !reduceMotion && canHover){
+    heroGlass.addEventListener("mousemove", function(e){
+      var r = heroGlass.getBoundingClientRect();
+      var px = (e.clientX - r.left)/r.width - 0.5;
+      var py = (e.clientY - r.top)/r.height - 0.5;
+      heroGlass.style.setProperty("--ry",(px*8).toFixed(2)+"deg");
+      heroGlass.style.setProperty("--rx",(py*-8).toFixed(2)+"deg");
+      heroGlass.style.setProperty("--mx",(px*100+50).toFixed(1)+"%");
+      heroGlass.style.setProperty("--my",(py*100+50).toFixed(1)+"%");
+      heroPointer.x = px+0.5;
+      heroPointer.y = 1.0-(py+0.5);
+    });
+    heroGlass.addEventListener("mouseleave", function(){
+      heroGlass.style.setProperty("--rx","0deg");
+      heroGlass.style.setProperty("--ry","0deg");
+    });
+  }
+
+  /* Touch devices have no mouse — tilt the hero glass with the phone's gyroscope instead */
+  if(heroGlass && !reduceMotion && !canHover && "DeviceOrientationEvent" in window){
+    var tiltActive = false;
+    function handleTilt(e){
+      if(e.beta===null || e.gamma===null) return;
+      var beta = Math.max(-24, Math.min(24, e.beta - 45));
+      var gamma = Math.max(-24, Math.min(24, e.gamma));
+      heroGlass.style.setProperty("--ry",(gamma*0.3).toFixed(2)+"deg");
+      heroGlass.style.setProperty("--rx",(beta*-0.3).toFixed(2)+"deg");
+      heroGlass.style.setProperty("--mx",(50+gamma*1.1).toFixed(1)+"%");
+      heroGlass.style.setProperty("--my",(30+beta*0.7).toFixed(1)+"%");
+      heroPointer.x = Math.max(0,Math.min(1, 0.5+gamma/48));
+      heroPointer.y = Math.max(0,Math.min(1, 0.5+beta/48));
+    }
+    function startTilt(){
+      if(tiltActive) return;
+      tiltActive = true;
+      window.addEventListener("deviceorientation", handleTilt);
+    }
+    try{
+      if(typeof DeviceOrientationEvent.requestPermission === "function"){
+        document.addEventListener("touchend", function onFirstTouch(){
+          document.removeEventListener("touchend", onFirstTouch);
+          DeviceOrientationEvent.requestPermission().then(function(state){
+            if(state === "granted") startTilt();
+          }).catch(function(){});
+        }, { once:true });
+      } else {
+        startTilt();
+      }
+    }catch(err){ /* orientation unavailable — glass still looks fine static */ }
+  }
+
+  /* Hero glass: WebGL shader does the actual light-bending. Falls back to the CSS glass look above if unavailable. */
+  (function initHeroShader(){
+    var canvas = document.getElementById("heroCanvas");
+    if(!canvas || !heroGlass) return;
+    var gl;
+    try{ gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl"); }catch(e){ gl = null; }
+    if(!gl){ canvas.style.display = "none"; return; }
+
+    var vsSource = "attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0.0,1.0);}";
+    var fsSource = [
+      "precision highp float;",
+      "uniform vec2 u_resolution;",
+      "uniform float u_time;",
+      "uniform vec2 u_mouse;",
+      "float hash21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}",
+      "float vnoise(vec2 p){",
+      "  vec2 i=floor(p),f=fract(p);",
+      "  float a=hash21(i),b=hash21(i+vec2(1.0,0.0)),c=hash21(i+vec2(0.0,1.0)),d=hash21(i+vec2(1.0,1.0));",
+      "  vec2 u=f*f*(3.0-2.0*f);",
+      "  return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);",
+      "}",
+      "float fbm(vec2 p){",
+      "  float v=0.0,a=0.5;",
+      "  for(int i=0;i<4;i++){v+=a*vnoise(p);p*=2.03;a*=0.56;}",
+      "  return v;",
+      "}",
+      "float thinLine(float x,float freq,float width){",
+      "  float f=fract(x*freq);",
+      "  float d=min(f,1.0-f);",
+      "  return 1.0-smoothstep(0.0,width,d);",
+      "}",
+      "vec3 palette(float t){",
+      "  vec3 c1=vec3(0.114,0.302,0.86);",
+      "  vec3 c2=vec3(0.078,0.700,0.700);",
+      "  vec3 c3=vec3(0.25,0.75,0.46);",
+      "  vec3 col=mix(c1,c2,smoothstep(0.0,0.5,t));",
+      "  col=mix(col,c3,smoothstep(0.5,1.0,t));",
+      "  return col;",
+      "}",
+      "vec3 scene(vec2 uv){",
+      "  vec2 p=uv*2.0;",
+      "  float n1=fbm(p+vec2(u_time*0.045,u_time*0.03));",
+      "  float n2=fbm(p*1.3-vec2(u_time*0.03,u_time*0.045)+9.0);",
+      "  float m=clamp(n1*0.5+n2*0.5,0.0,1.0);",
+      "  vec3 col=palette(m);",
+      "  float gx=thinLine(uv.x+n1*0.15,6.0,0.045);",
+      "  float gy=thinLine(uv.y+n2*0.15,4.0,0.045);",
+      "  col+=vec3(0.85,1.0,0.97)*(gx+gy)*0.16;",
+      "  return col;",
+      "}",
+      "void main(){",
+      "  vec2 uv=gl_FragCoord.xy/u_resolution.xy;",
+      "  vec2 c=uv-0.5;",
+      "  float r=length(c)*2.0;",
+      "  r=clamp(r,0.0,1.0);",
+      "  vec2 dir=(length(c)>0.0001)?normalize(c):vec2(0.0);",
+      "  float bend=pow(r,2.0)*0.20;",
+      "  vec2 warped=uv+dir*bend;",
+      "  float chroma=0.004+pow(r,1.8)*0.016;",
+      "  vec3 colA=scene(warped+dir*chroma);",
+      "  vec3 colB=scene(warped-dir*chroma);",
+      "  vec3 col=vec3(colA.r,(colA.g+colB.g)*0.5,colB.b);",
+      "  col*=0.52;",
+      "  float vign=1.0-smoothstep(0.35,1.05,r);",
+      "  col*=(0.66+0.24*vign);",
+      "  vec2 lightDir=normalize(u_mouse-vec2(0.5));",
+      "  float spec=pow(max(dot(dir,lightDir),0.0),3.0)*smoothstep(0.2,1.0,r);",
+      "  col+=vec3(1.0,1.0,0.98)*spec*0.4;",
+      "  float rim=smoothstep(0.7,0.92,r)*(1.0-smoothstep(0.92,1.0,r));",
+      "  col+=vec3(0.8,0.97,0.95)*rim*0.35;",
+      "  col+=(vnoise(uv*300.0)-0.5)*0.02;",
+      "  gl_FragColor=vec4(col,1.0);",
+      "}"
+    ].join("\n");
+
+    function compile(type, src){
+      var s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ gl.deleteShader(s); return null; }
+      return s;
+    }
+    var vs = compile(gl.VERTEX_SHADER, vsSource);
+    var fs = compile(gl.FRAGMENT_SHADER, fsSource);
+    if(!vs || !fs){ canvas.style.display = "none"; return; }
+
+    var prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){ canvas.style.display = "none"; return; }
+    gl.useProgram(prog);
+
+    var buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    var posLoc = gl.getAttribLocation(prog, "a_pos");
+    gl.enableVertexAttribArray(posLoc);
+    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+    var uRes = gl.getUniformLocation(prog, "u_resolution");
+    var uTime = gl.getUniformLocation(prog, "u_time");
+    var uMouse = gl.getUniformLocation(prog, "u_mouse");
+
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    function resize(){
+      var rect = canvas.getBoundingClientRect();
+      var w = Math.max(1, Math.round(rect.width*dpr));
+      var h = Math.max(1, Math.round(rect.height*dpr));
+      if(canvas.width!==w || canvas.height!==h){
+        canvas.width = w; canvas.height = h;
+        gl.viewport(0,0,w,h);
+      }
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    var start = null, frameCount = 0;
+    function frame(now){
+      if(start===null) start = now;
+      frameCount++;
+      if(reduceMotion && frameCount>1) return; // one static frame, then stop
+      if(frameCount % 2 === 0){ requestAnimationFrame(frame); return; } // ~30fps
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform1f(uTime, reduceMotion ? 0.0 : (now-start)/1000);
+      gl.uniform2f(uMouse, heroPointer.x, heroPointer.y);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+
+  if("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target); }
+      });
+    }, { threshold:0.15 });
+    document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+  } else {
+    document.querySelectorAll(".reveal").forEach(function(el){ el.classList.add("in"); });
+  }
+
+  loadReleases();
+})();
+</script>
+</body>
+</html>
